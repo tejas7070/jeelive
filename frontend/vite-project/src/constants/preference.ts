@@ -1,0 +1,1 @@
+export const BRANCHES = ["CS", "IT", "MECH"]
