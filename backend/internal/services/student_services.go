@@ -74,3 +74,14 @@ func RunCAP() {
 		students[i].Allotted = bestBranch
 	}
 }
+
+func DeleteStudent(id int) bool {
+	for i, student := range students {
+		if student.ID == id {
+			students =  append(students[:i], students[i+1:]...)
+			return true 
+		}
+
+}
+	return false
+}
