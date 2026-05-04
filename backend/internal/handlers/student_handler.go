@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -9,54 +8,98 @@ import (
 	"jeelive/internal/services"
 )
 
-func GetStudents(c *gin.Context) {
-	c.JSON(http.StatusOK, services.GetStudents())
+type createReq struct {
+	Name        string   `json:"name"`
+	Percentile  float64  `json:"percentile"`
+	Preferences []string `json:"preferences"`
 }
 
+// POST /students
 func CreateStudent(c *gin.Context) {
-	var student models.Student
-
-	if err := c.ShouldBindJSON(&student); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req createReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid body"})
 		return
 	}
 
-	if student.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Name is required"})
+	// validations
+	if req.Name == "" {
+		c.JSON(400, gin.H{"error": "Name required"})
+		return
+	}
+	if req.Percentile < 0 || req.Percentile > 100 {
+		c.JSON(400, gin.H{"error": "Percentile 0–100"})
+		return
+	}
+	if len(req.Preferences) == 0 {
+		c.JSON(400, gin.H{"error": "Select preferences"})
 		return
 	}
 
-	if student.Percentile < 0 || student.Percentile > 100 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Percentile must be between 0 and 100"})
-		return
-	}
+	s, err := services.CreateStudent(models.Student{
+		Name:       req.Name,
+		Percentile: req.Percentile,
+	}, req.Preferences)
 
-	if len(student.Preferences) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "At least one preference is required"})
-		return
-	}
-
-	created := services.CreateStudent(student)
-	c.JSON(http.StatusCreated, created)
-}
-
-func RunCAP(c *gin.Context) {
-	services.RunCAP()
-	c.JSON(http.StatusOK, gin.H{"message": "CAP round completed"})
-}
-
-func DeleteStudent(c *gin.Context) {
-	idParam := c.Param("id")
-
-	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	deleted := services.DeleteStudent(id)
-	if !deleted {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+
+	// convert JSON -> []string for response
+	prefs, _ := models.GetPreferences(s.Preferences)
+
+	c.JSON(201, gin.H{
+		"id":          s.ID,
+		"name":        s.Name,
+		"percentile":  s.Percentile,
+		"preferences": prefs,
+		"allotted":    s.Allotted,
+	})
+}
+
+// GET /students
+func GetStudents(c *gin.Context) {
+	list, err := services.GetStudents()
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Student deleted successfully"})
+
+	var resp []gin.H
+	for _, s := range list {
+		prefs, _ := models.GetPreferences(s.Preferences)
+		resp = append(resp, gin.H{
+			"id":          s.ID,
+			"name":        s.Name,
+			"percentile":  s.Percentile,
+			"preferences": prefs,
+			"allotted":    s.Allotted,
+		})
+	}
+
+	c.JSON(200, resp)
+}
+
+// DELETE /students/:id
+func DeleteStudent(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid id"})
+		return
+	}
+	if !services.DeleteStudent(id) {
+		c.JSON(404, gin.H{"error": "Not found"})
+		return
+	}
+	c.JSON(200, gin.H{"message": "deleted"})
+}
+
+// POST /run-cap
+func RunCAP(c *gin.Context) {
+	if err := services.RunCAP(); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "CAP completed"})
 }

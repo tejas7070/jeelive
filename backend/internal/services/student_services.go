@@ -1,87 +1,85 @@
 package services
 
 import (
-	"strings"
-
+	"jeelive/internal/config"
 	"jeelive/internal/models"
 )
 
-var students []models.Student
-var idCounter = 1
-
-// Single source of truth
+// cutoffs + branches (keep as you had)
 var branches = []string{"CS", "IT", "MECH"}
 
-// Cutoffs
 var cutoffs = map[string]float64{
 	"CS":   90,
 	"IT":   80,
-	"MECH": 50,
+	"MECH": 70,
 }
 
-// Create Student
-func CreateStudent(student models.Student) models.Student {
-	student.ID = idCounter
-	idCounter++
-	student.Allotted = ""
-
-	students = append(students, student)
-	return student
-}
-
-// Get Students
-func GetStudents() []models.Student {
-	return students
-}
-
-// Resolve "ALL" preference
 func resolvePreferences(prefs []string) []string {
-	if len(prefs) == 1 && strings.ToUpper(prefs[0]) == "ALL" {
+	if len(prefs) == 1 && prefs[0] == "ALL" {
 		return branches
 	}
 	return prefs
 }
 
-// Run CAP Logic
-func RunCAP() {
-	for i, student := range students {
-
-		// reset previous allocation
-		students[i].Allotted = ""
-    bestBranch := ""
-		highestCutoff := 0.0
-
-		// handle ALL case
-		resolvedPrefs := resolvePreferences(student.Preferences)
-
-		for _, pref := range resolvedPrefs {
-
-			// check if branch exists in cutoff map
-			cutoff, exists := cutoffs[pref]
-			if !exists {
-				continue // skip invalid values like "ALL"
-			}
-
-
-			// apply eligibility
-			if student.Percentile >= cutoff {
-				if cutoff > highestCutoff {
-					highestCutoff = cutoff
-					bestBranch = pref
-				}
-			}
-		}
-		students[i].Allotted = bestBranch
+// CREATE
+func CreateStudent(s models.Student, prefs []string) (models.Student, error) {
+	j, err := models.SetPreferences(prefs)
+	if err != nil {
+		return s, err
 	}
+	s.Preferences = j
+	s.Allotted = ""
+
+	if err := config.DB.Create(&s).Error; err != nil {
+		return s, err
+	}
+	return s, nil
 }
 
+// READ
+func GetStudents() ([]models.Student, error) {
+	var out []models.Student
+	if err := config.DB.Find(&out).Error; err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// DELETE
 func DeleteStudent(id int) bool {
-	for i, student := range students {
-		if student.ID == id {
-			students =  append(students[:i], students[i+1:]...)
-			return true 
+	res := config.DB.Delete(&models.Student{}, id)
+	return res.RowsAffected > 0
+}
+
+// CAP
+func RunCAP() error {
+	var list []models.Student
+	if err := config.DB.Find(&list).Error; err != nil {
+		return err
+	}
+
+	for i := range list {
+		prefs, _ := models.GetPreferences(list[i].Preferences)
+		resolved := resolvePreferences(prefs)
+
+		best := ""
+		bestCut := 0.0
+
+		for _, p := range resolved {
+			cut, ok := cutoffs[p]
+			if !ok {
+				continue
+			}
+			if list[i].Percentile >= cut && cut > bestCut {
+				bestCut = cut
+				best = p
+			}
 		}
 
-}
-	return false
+		list[i].Allotted = best
+		if err := config.DB.Save(&list[i]).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
