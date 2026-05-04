@@ -1,17 +1,19 @@
 package main
 
 import (
-	"jeelive/internal/routes"
-
 	"github.com/gin-gonic/gin"
+	"jeelive/internal/config"
 	"jeelive/internal/middleware"
+	"jeelive/internal/routes"
 )
 
 func main() {
-	r := gin.Default()
+	config.ConnectDB()
 
+	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
+
 	routes.RegisterRoutes(r)
 
-  r.Run(":8081")
+	r.Run(":8080")
 }
