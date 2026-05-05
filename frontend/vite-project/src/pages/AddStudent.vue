@@ -12,6 +12,17 @@ const formData = reactive({
   preferences: [] as string[]
 })
 
+const errors  = reactive({
+  name: "",
+  percentile: "",
+  preferences: ""
+})
+
+const resetErrors = () => {
+  errors.name = ""
+  errors.percentile = ""
+  errors.preferences = ""
+}
 const isSelected = (branch: string) => formData.preferences.includes(branch)
 
 const togglePreference = (branch: string) => {
@@ -33,13 +44,30 @@ const togglePreference = (branch: string) => {
 }
 
 const submit = async () => {
-  await addStudent({
-    name: formData.name,
-    percentile: formData.percentile,
-    preferences: formData.preferences
-  })
+  resetErrors()
+ try{
+   await addStudent({
+     name: formData.name,
+     percentile: formData.percentile,
+     preferences: formData.preferences
+   })
 
-  router.push("/students")
+   router.push("/students")
+ } catch (e: any) {
+   const msg = e.response?.data?.error || "An error occurred"
+
+   const lower = msg.toLowerCase()
+
+   if (lower.includes("name")) {
+     errors.name = msg
+   } else if (lower.includes("percentile")) {
+     errors.percentile = msg
+   } else if (lower.includes("preference")) {
+     errors.preferences = msg
+   } else {
+     alert(msg)
+   }
+ }
 }
 </script>
 
@@ -56,6 +84,9 @@ const submit = async () => {
       <label class="field">
         <span>Name</span>
         <input v-model.trim="formData.name" placeholder="Student name" />
+        <small v-if="errors.name" class="error">
+          {{ errors.name }}*
+        </small>
       </label>
 
       <label class="field">
@@ -68,6 +99,9 @@ const submit = async () => {
           step="0.01"
           placeholder="98.4"
         />
+        <small v-if="errors.percentile" class="error">
+          {{ errors.percentile }}*
+        </small>
       </label>
 
       <div class="field preferences-field">
@@ -98,6 +132,9 @@ const submit = async () => {
             </span>
           </label>
         </div>
+        <small v-if="errors.preferences" class="error">
+          {{ errors.preferences }}*
+        </small>
       </div>
 
       <button class="primary-btn" type="submit">Submit</button>

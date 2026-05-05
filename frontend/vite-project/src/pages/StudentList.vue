@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { getStudents, runCap } from "../services/api"
+import { getStudents, runCap, deleteStudent } from "../services/api"
 import { computed, onMounted, ref } from "vue"
 import type { Student } from "../types/student"
+import { useRouter } from "vue-router"
 
 const students = ref<Student[]>([])
 const loading = ref(false)
@@ -18,6 +19,19 @@ const handleRunCap = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const router = useRouter()
+
+const handleView = (id: number) => {
+  router.push(`/students/${id}`)
+}
+
+const handleDelete = async (id: number) => {
+  const confirmed = confirm("Are you sure you want to delete this student?")
+  if (!confirmed) return
+  await deleteStudent(id)
+  await fetchStudents()
 }
 
 const studentCount = computed(() => students.value.length)
@@ -47,6 +61,7 @@ onMounted(fetchStudents)
               <th>Percentile</th>
               <th>Allotted</th>
               <th>Preferences</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -57,6 +72,9 @@ onMounted(fetchStudents)
               <td data-label="Percentile">
                 <span class="student-value">{{ s.percentile }}</span>
               </td>
+              <td data-label="Allotted">
+                <span class="status-pill status-pill--table">{{ s.allotted || "Pending" }}</span>
+              </td>
               <td data-label="Preferences">
                 <div class="preference-chips">
                   <span v-for="pref in s.preferences" :key="pref" class="mini-chip">
@@ -64,8 +82,15 @@ onMounted(fetchStudents)
                   </span>
                 </div>
               </td>
-              <td data-label="Allotted">
-                <span class="status-pill status-pill--table">{{ s.allotted || "Pending" }}</span>
+              <td data-label="Actions">
+                <div class="action-group">
+                  <button class="action-btn action-btn--view" @click="handleView(s.id)">
+                    View
+                  </button>
+                  <button class="action-btn action-btn--delete" @click="handleDelete(s.id)">
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
