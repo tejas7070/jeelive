@@ -11,5 +11,6 @@ func RegisterRoutes(r *gin.Engine) {
 	api.GET("/students", handlers.GetStudents)
 	api.POST("/students", handlers.CreateStudent)
 	api.POST("/run-cap", handlers.RunCAP)
+	api.GET("/students/:id", handlers.GetStudentByID)
 	api.DELETE("/students/:id", handlers.DeleteStudent)
 }

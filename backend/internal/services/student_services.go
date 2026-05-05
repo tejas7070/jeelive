@@ -45,6 +45,18 @@ func GetStudents() ([]models.Student, error) {
 	return out, nil
 }
 
+//Show 
+func GetStudent(id int) (models.Student, bool) {
+	var student models.Student
+
+	result := config.DB.First(&student, id)
+
+	if result.Error != nil {
+		return student, false
+	}
+
+	return student, true
+}
 // DELETE
 func DeleteStudent(id int) bool {
 	res := config.DB.Delete(&models.Student{}, id)

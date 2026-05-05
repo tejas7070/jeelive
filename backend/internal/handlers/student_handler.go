@@ -14,6 +14,31 @@ type createReq struct {
 	Preferences []string `json:"preferences"`
 }
 
+func GetStudentByID(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	student, found := services.GetStudent(id)
+	if !found {
+		c.JSON(404, gin.H{"error": "Student not found"})
+		return
+	}
+
+	prefs, _ := models.GetPreferences(student.Preferences)
+
+	c.JSON(200, gin.H{
+		"id":          student.ID,
+		"name":        student.Name,
+		"percentile":  student.Percentile,
+		"preferences": prefs,
+		"allotted":    student.Allotted,
+	})
+}
 // POST /students
 func CreateStudent(c *gin.Context) {
 	var req createReq
