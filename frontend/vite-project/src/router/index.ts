@@ -6,6 +6,7 @@ import ViewStudent from "../pages/viewStudent.vue"
 const routes = [
   { path: "/", component: StudentList, alias: "/students" },
   { path: "/add", component: AddStudent },
+  { path: "/students/:id/edit", component: AddStudent },
   {
     path: "/students/:id",
     name: "view-student",
