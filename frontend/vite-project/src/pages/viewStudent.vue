@@ -43,7 +43,7 @@ onMounted(fetchStudent)
         <h2>Student Details</h2>
       </div>
 
-      <RouterLink to="/" class="back-link">Back to list</RouterLink>
+      <RouterLink to="/students" class="back-link">Back to list</RouterLink>
     </div>
 
     <div v-if="loading" class="student-detail-state">
