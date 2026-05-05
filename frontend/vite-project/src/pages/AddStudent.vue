@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { addStudent } from "../services/api"
-import { useRouter } from "vue-router"
-import { reactive } from "vue"
+import { addStudent,getStudentById, updateStudent } from "../services/api"
+import { useRouter, useRoute } from "vue-router"
+import { reactive, onMounted } from "vue"
 import { BRANCHES } from "../constants/preference"
 
 const router = useRouter()
+const route = useRoute()
+
+const isEdit = !!route.params.id
+const studentId = Number(route.params.id)
 
 const formData = reactive({
   name: "",
@@ -15,7 +19,8 @@ const formData = reactive({
 const errors  = reactive({
   name: "",
   percentile: "",
-  preferences: ""
+  preferences: "",
+  general: ""
 })
 
 const resetErrors = () => {
@@ -24,6 +29,18 @@ const resetErrors = () => {
   errors.preferences = ""
 }
 const isSelected = (branch: string) => formData.preferences.includes(branch)
+
+onMounted(async() => {
+  if (isEdit) {
+    const data = await getStudentById(studentId)
+
+    formData.name = data.name
+    formData.percentile = data.percentile
+    formData.preferences = data.preferences
+  }
+})
+
+
 
 const togglePreference = (branch: string) => {
   if (branch === "ALL") {
@@ -45,29 +62,33 @@ const togglePreference = (branch: string) => {
 
 const submit = async () => {
   resetErrors()
- try{
-   await addStudent({
-     name: formData.name,
-     percentile: formData.percentile,
-     preferences: formData.preferences
-   })
 
-   router.push("/students")
- } catch (e: any) {
-   const msg = e.response?.data?.error || "An error occurred"
+  try {
+    if (isEdit) {
+      await updateStudent(studentId, {
+        name: formData.name,
+        percentile: formData.percentile,
+        preferences: formData.preferences
+      })
+    } else {
+      await addStudent({
+        name: formData.name,
+        percentile: formData.percentile,
+        preferences: formData.preferences
+      })
+    }
 
-   const lower = msg.toLowerCase()
+    router.push("/students")
 
-   if (lower.includes("name")) {
-     errors.name = msg
-   } else if (lower.includes("percentile")) {
-     errors.percentile = msg
-   } else if (lower.includes("preference")) {
-     errors.preferences = msg
-   } else {
-     alert(msg)
-   }
- }
+  } catch (e: any) {
+    const msg = e.response?.data?.error || "Error occurred"
+    const lower = msg.toLowerCase()
+
+    if (lower.includes("name")) errors.name = msg
+    else if (lower.includes("percentile")) errors.percentile = msg
+    else if (lower.includes("preference")) errors.preferences = msg
+    else errors.general = msg
+  }
 }
 </script>
 
@@ -76,7 +97,7 @@ const submit = async () => {
     <div class="page-heading">
       <div>
         <p class="section-label">New entry</p>
-        <h2>Add Student</h2>
+        <h2>{{ isEdit ? "Edit Student Details" : "Add Student" }}</h2>
       </div>
     </div>
 

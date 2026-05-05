@@ -1,23 +1,44 @@
 <script setup lang="ts">
 import { getStudents, runCap, deleteStudent } from "../services/api"
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import type { Student } from "../types/student"
 import { useRouter } from "vue-router"
+const isCapRunning = ref(false)
+let capTimeout: number | undefined
 
 const students = ref<Student[]>([])
-const loading = ref(false)
 
 const fetchStudents = async () => {
   students.value = (await getStudents()).data
 }
 
+watch(isCapRunning, (running) => {
+  document.body.style.overflow = running ? "hidden" : ""
+})
+
+onUnmounted(() => {
+  if (capTimeout !== undefined) {
+    window.clearTimeout(capTimeout)
+  }
+  document.body.style.overflow = ""
+})
+
 const handleRunCap = async () => {
-  loading.value = true
+  isCapRunning.value = true
+
+  const start = Date.now()
+
   try {
     await runCap()
     await fetchStudents()
   } finally {
-    loading.value = false
+    // ensure minimum 2 sec loading
+    const elapsed = Date.now() - start
+    const delay = Math.max(0, 2000 - elapsed)
+
+    capTimeout = window.setTimeout(() => {
+      isCapRunning.value = false
+    }, delay)
   }
 }
 
@@ -26,6 +47,11 @@ const router = useRouter()
 const handleView = (id: number) => {
   router.push(`/students/${id}`)
 }
+
+const handleEdit = (id: number) => {
+  router.push(`/students/${id}/edit`)
+}
+
 
 const handleDelete = async (id: number) => {
   const confirmed = confirm("Are you sure you want to delete this student?")
@@ -46,8 +72,8 @@ onMounted(fetchStudents)
         <p class="section-label">Live list</p>
         <h2>Students ({{ studentCount }})</h2>
       </div>
-      <button class="primary-btn" @click="handleRunCap" :disabled="loading">
-        {{ loading ? "Running..." : "Run CAP" }}
+      <button class="primary-btn" @click="handleRunCap" :disabled="isCapRunning" :aria-busy="isCapRunning">
+        {{ isCapRunning ? "Running CAP..." : "Run CAP" }}
       </button>
     </div>
 
@@ -87,6 +113,9 @@ onMounted(fetchStudents)
                   <button class="action-btn action-btn--view" @click="handleView(s.id)">
                     View
                   </button>
+                  <button class="action-btn action-btn--edit" @click="handleEdit(s.id)">
+                    Edit
+                  </button>
                   <button class="action-btn action-btn--delete" @click="handleDelete(s.id)">
                     Delete
                   </button>
@@ -101,6 +130,22 @@ onMounted(fetchStudents)
     <div v-else class="empty-state">
       <p class="empty-state__title">No students yet</p>
       <p class="empty-state__copy">Add a student to start the allocation flow.</p>
+    </div>
+  </div>
+  <div
+    v-if="isCapRunning"
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cap-modal-title"
+    aria-describedby="cap-modal-subtitle"
+  >
+    <div class="modal">
+      <div class="modal__spinner" aria-hidden="true"></div>
+      <div class="modal__copy">
+        <p class="modal-title" id="cap-modal-title">Running CAP Allocation</p>
+        <p class="modal-sub" id="cap-modal-subtitle">Processing student preferences and updating the live list.</p>
+      </div>
     </div>
   </div>
 </template>

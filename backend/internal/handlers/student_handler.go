@@ -13,6 +13,11 @@ type createReq struct {
 	Percentile  float64  `json:"percentile"`
 	Preferences []string `json:"preferences"`
 }
+type editReq struct {
+	Name        string   `json:"name"`
+	Percentile  float64  `json:"percentile"`
+	Preferences []string `json:"preferences"`
+}
 
 func GetStudentByID(c *gin.Context) {
 	idParam := c.Param("id")
@@ -127,4 +132,50 @@ func RunCAP(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"message": "CAP completed"})
+}
+
+func EditStudent(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID"})
+	
+		return}    
+	var req editReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error":" Invalid body"})
+		
+    
+	}
+	if req.Name == "" {
+		c.JSON(400, gin.H{"error": "Name is Required"})
+	
+		return}    
+	if req.Percentile < 0 || req.Percentile > 100 {
+		c.JSON(400, gin.H{"error": "Percentile must be between 0 and 100"})
+	
+		return}    
+	if req.Preferences == nil || len(req.Preferences) == 0 {
+		c.JSON(400, gin.H{"error": "At least one preference is required"})
+	
+		return}    
+
+	s, found, err := services.EditStudent(id, req.Name, req.Percentile, req.Preferences)
+	if err !=  nil {
+		c.JSON(422, gin.H{"error": err.Error()})
+	
+		return}    
+	if !found {
+		c.JSON(404, gin.H{"error": "Student not found"})
+	
+		return}    
+	prefs, _ := models.GetPreferences(s.Preferences)
+	c.JSON(200, gin.H{
+		"id": s.ID,
+		"name": s.Name,
+		"percentile": s.Percentile,
+		"preferences": prefs,
+		"allotted": s.Allotted,
+	})
 }
