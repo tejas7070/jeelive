@@ -95,3 +95,26 @@ func RunCAP() error {
 	}
 	return nil
 }
+
+func EditStudent(id int, name string, percentile float64, prefs []string) (models.Student,bool, error) {
+	var s models.Student
+
+	if err := config.DB.First(&s,id).Error; err != nil {
+		return s, false, err
+	}
+	j, err := models.SetPreferences(prefs)
+	if err != nil {
+		return s, false, err
+	}
+
+	s.Name = name
+	s.Percentile = percentile
+	s.Preferences = j
+
+	s.Allotted = ""
+
+	if err := config.DB.Save(&s).Error; err != nil {
+		return s, false, err
+	}
+	return s, true, nil
+}
