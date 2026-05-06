@@ -425,6 +425,11 @@ button {
   background: #fff;
 }
 
+.dashboard-stat-card--loading {
+  border-style: dashed;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+}
+
 .dashboard-stat-note {
   margin: 0;
   color: var(--text-faint);
@@ -478,12 +483,93 @@ button {
   box-shadow: var(--shadow);
 }
 
+.dashboard-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .dashboard-card h3 {
   margin: 0;
   color: var(--text);
   font-family: var(--font-display);
   font-size: 1.15rem;
   letter-spacing: -0.03em;
+}
+
+.dashboard-card__meta {
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.dashboard-card--stats {
+  gap: 18px;
+}
+
+.dashboard-inline-message {
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.dashboard-inline-message--error {
+  color: #b91c1c;
+}
+
+.branch-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.branch-stat-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #edf1f7;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+}
+
+.branch-stat-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.branch-stat-card__title {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.branch-stat-card__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.branch-stat-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.branch-stat-card__metrics > div {
+  display: grid;
+  gap: 4px;
 }
 
 .dashboard-shortcuts {
@@ -1085,6 +1171,20 @@ button {
   }
 
   .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-card__head,
+  .branch-stat-card__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .branch-stat-card__metrics {
     grid-template-columns: 1fr;
   }
 }

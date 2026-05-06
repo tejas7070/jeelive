@@ -14,3 +14,4 @@ export const updateStudent = async (id: number, data: any ) => {
 export const addStudent = (data: any) => axios.post(`${Api}/students`, data);
 export const runCap = () => axios.post(`${Api}/run-cap`)
 export const deleteStudent = (id: number) => axios.delete(`${Api}/students/${id}`);
+export const getStats = () => axios.get(`${Api}/stats/seats`)
