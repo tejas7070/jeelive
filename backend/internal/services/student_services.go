@@ -3,6 +3,7 @@ package services
 import (
 	"jeelive/internal/config"
 	"jeelive/internal/models"
+	"sort"
 )
 
 // cutoffs + branches (keep as you had)
@@ -12,6 +13,12 @@ var cutoffs = map[string]float64{
 	"CS":   90,
 	"IT":   80,
 	"MECH": 70,
+}
+
+var seatLimits =  map[string] int {
+	"CS": 2,
+	"IT": 2,
+	"MECH": 2,
 }
 
 func resolvePreferences(prefs []string) []string {
@@ -65,31 +72,35 @@ func DeleteStudent(id int) bool {
 
 // CAP
 func RunCAP() error {
-	var list []models.Student
-	if err := config.DB.Find(&list).Error; err != nil {
+	var students []models.Student
+	if err := config.DB.Find(&students).Error; err != nil {
 		return err
 	}
 
-	for i := range list {
-		prefs, _ := models.GetPreferences(list[i].Preferences)
-		resolved := resolvePreferences(prefs)
+	sort.Slice(students, func(i, j int) bool {
+		return students[i].Percentile > students[j].Percentile
+	})
+		filled := map[string]int{
+		"CS":   0,
+		"IT":   0,
+		"MECH": 0,
+	}
 
-		best := ""
-		bestCut := 0.0
+	for i := range students {
+		prefs, _ := models.GetPreferences(students[i].Preferences)
+		resolved := resolvePreferences(prefs)
+		allotted := ""
 
 		for _, p := range resolved {
-			cut, ok := cutoffs[p]
-			if !ok {
-				continue
-			}
-			if list[i].Percentile >= cut && cut > bestCut {
-				bestCut = cut
-				best = p
-			}
+     if filled[p] < seatLimits[p]{
+			allotted = p
+			filled[p]++
+			break
+		 }
 		}
 
-		list[i].Allotted = best
-		if err := config.DB.Save(&list[i]).Error; err != nil {
+		students[i].Allotted = allotted
+		if err := config.DB.Save(&students[i]).Error; err != nil {
 			return err
 		}
 	}
