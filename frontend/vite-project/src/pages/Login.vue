@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { useRoute } from "vue-router"
 import { login, setToken } from "../services/api"
 
 const route = useRoute()
-const router = useRouter()
 
 const email = ref("")
 const password = ref("")
@@ -37,7 +36,7 @@ const handleSubmit = async () => {
     }
 
     setToken(response.token)
-    await router.replace(redirectTarget.value)
+    window.location.replace(redirectTarget.value)
   } catch {
     errorMessage.value = "Login failed. Please check your details and try again."
   } finally {

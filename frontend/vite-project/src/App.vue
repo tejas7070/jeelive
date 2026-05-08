@@ -10,7 +10,7 @@ const showShell = computed(() => hasToken() && route.name !== "login")
 
 const handleLogout = () => {
   clearToken()
-  router.push({ name: "login" })
+  window.location.replace("/login")
 }
 
 const handleRunCap = async () => {
@@ -178,6 +178,10 @@ const handleRunCap = async () => {
                   </svg>
                 </button>
               </div>
+
+              <button class="jeel-logout" type="button" @click="handleLogout">
+                Logout
+              </button>
             </div>
           </header>
 
@@ -444,6 +448,7 @@ const handleRunCap = async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .jeel-notification {
@@ -514,6 +519,31 @@ const handleRunCap = async () => {
   height: 14px;
 }
 
+.jeel-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid #0f172a;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.jeel-logout:hover {
+  transform: translateY(-1px);
+  background: #111827;
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.16);
+}
+
 .jeel-content {
   min-width: 0;
   padding: 10px;
@@ -521,6 +551,9 @@ const handleRunCap = async () => {
 
 .jeel-auth {
   min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
 }
 
 @media (max-width: 1180px) {
