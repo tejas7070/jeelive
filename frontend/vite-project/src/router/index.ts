@@ -4,6 +4,8 @@ import Login from "../pages/Login.vue"
 import StudentList from "../pages/StudentList.vue"
 import AddStudent from "../pages/AddStudent.vue"
 import ViewStudent from "../pages/viewStudent.vue"
+import Branches from "../pages/Branches.vue"
+import Cutoffs from "../pages/Cutoffs.vue"
 import { hasToken } from "../services/api"
 
 const routes = [
@@ -11,6 +13,8 @@ const routes = [
   { path: "/", name: "home", component: Home, meta: { requiresAuth: true } },
   { path: "/students", name: "students", component: StudentList, meta: { requiresAuth: true } },
   { path: "/add", name: "add-student", component: AddStudent, meta: { requiresAuth: true } },
+  { path: "/branches", name: "branches", component: Branches, meta: { requiresAuth: true } },
+  { path: "/cutoffs", name: "cutoffs", component: Cutoffs, meta: { requiresAuth: true } },
   { path: "/students/:id/edit", name: "edit-student", component: AddStudent, meta: { requiresAuth: true } },
   {
     path: "/students/:id",

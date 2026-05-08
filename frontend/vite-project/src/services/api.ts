@@ -44,3 +44,21 @@ export const login = async (data: any) => {
   const res = await api.post("/login", data)
   return res.data
 }
+
+/// Branches
+
+export const getBranches = async () => {
+  const res = await api.get("/branches")
+  return res.data
+}
+
+export const getBranch = async (id: string) => {
+  const res = await api.get(`/branches/${id}`)
+  return res.data
+}
+export const updateBranch = async (id: string, data: any) => {
+  const res = await api.put(`/branches/${id}`, data)
+  return res.data
+}
+export const addBranch = (data: any) => api.post("/branches", data)
+export const deleteBranch = (id: string) => api.delete(`/branches/${id}`)

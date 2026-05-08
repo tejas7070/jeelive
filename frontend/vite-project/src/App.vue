@@ -88,19 +88,19 @@ const handleRunCap = async () => {
               <span>Run CAP</span>
             </button>
 
-            <button class="jeel-sidebar__link jeel-sidebar__button" type="button">
+            <RouterLink to="/branches" class="jeel-sidebar__link">
               <span class="jeel-sidebar__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path d="M5 5h14v14H5z" />
                   <path d="M8 9h8M8 13h8" />
                 </svg>
               </span>
-              <span>CAP History</span>
-            </button>
+              <span>Branches</span>
+            </RouterLink>
 
             <p class="jeel-sidebar__section">Configuration</p>
 
-            <button class="jeel-sidebar__link jeel-sidebar__button" type="button">
+            <RouterLink to="/cutoffs" class="jeel-sidebar__link">
               <span class="jeel-sidebar__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path d="M3 19h18" />
@@ -109,26 +109,14 @@ const handleRunCap = async () => {
                   <path d="M18 16v-6" />
                 </svg>
               </span>
-              <span>Branches</span>
-            </button>
+              <span>Cutoffs</span>
+            </RouterLink>
 
             <button class="jeel-sidebar__link jeel-sidebar__button" type="button">
               <span class="jeel-sidebar__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path d="M4 19h16" />
                   <path d="M5 15l4-4 4 2 6-8" />
-                </svg>
-              </span>
-              <span>Cutoffs</span>
-            </button>
-
-            <button class="jeel-sidebar__link jeel-sidebar__button" type="button">
-              <span class="jeel-sidebar__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <circle cx="12" cy="12" r="3" />
-                  <path
-                    d="M19.4 15a7.8 7.8 0 0 0 0-6l2-1.2-2-3.4-2.3 1a8.2 8.2 0 0 0-5.1-3l-.3-2.4H10l-.3 2.4a8.2 8.2 0 0 0-5.1 3l-2.3-1-2 3.4L2.2 9a7.8 7.8 0 0 0 0 6l-2 1.2 2 3.4 2.3-1a8.2 8.2 0 0 0 5.1 3l.3 2.4h2.4l.3-2.4a8.2 8.2 0 0 0 5.1-3l2.3 1 2-3.4-2-1.2Z"
-                  />
                 </svg>
               </span>
               <span>Settings</span>
