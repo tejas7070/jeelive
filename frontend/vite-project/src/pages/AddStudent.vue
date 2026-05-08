@@ -8,8 +8,7 @@ const router = useRouter()
 const route = useRoute()
 
 const isEdit = !!route.params.id
-const studentId = Number(route.params.id)
-
+const studentId = route.params.id as string
 const formData = reactive({
   name: "",
   percentile: 0,
@@ -33,7 +32,7 @@ const isSelected = (branch: string) => formData.preferences.includes(branch)
 onMounted(async() => {
   if (isEdit) {
     const data = await getStudentById(studentId)
-
+  
     formData.name = data.name
     formData.percentile = data.percentile
     formData.preferences = data.preferences
@@ -96,7 +95,7 @@ const submit = async () => {
   <div class="page-stack">
     <div class="page-heading">
       <div>
-        <p class="section-label">New entry</p>
+        <p class="section-label">{{ isEdit ? "Edit" : "New " }} Student</p>
         <h2>{{ isEdit ? "Edit Student Details" : "Add Student" }}</h2>
       </div>
     </div>
