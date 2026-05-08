@@ -44,16 +44,16 @@ const handleRunCap = async () => {
 
 const router = useRouter()
 
-const handleView = (id: number) => {
+const handleView = (id: string) => {
   router.push(`/students/${id}`)
 }
 
-const handleEdit = (id: number) => {
+const handleEdit = (id: string) => {
   router.push(`/students/${id}/edit`)
 }
 
 
-const handleDelete = async (id: number) => {
+const handleDelete = async (id: string) => {
   const confirmed = confirm("Are you sure you want to delete this student?")
   if (!confirmed) return
   await deleteStudent(id)

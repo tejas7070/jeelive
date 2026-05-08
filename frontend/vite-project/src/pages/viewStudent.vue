@@ -2,29 +2,57 @@
 import { computed, onMounted, ref } from "vue"
 import { useRoute } from "vue-router"
 import { getStudentById } from "../services/api"
-import type { Student } from "../types/student"
+
+type StudentPayload = {
+  _id?: string
+  createdOn?: number
+  id?: string
+  modifiedOn?: number
+  name: string
+  percentile: number
+  preferences: string[]
+}
 
 const route = useRoute()
 
-const student = ref<Student | null>(null)
+const student = ref<StudentPayload | null>(null)
 const loading = ref(false)
 const error = ref("")
 
-const studentId = Number(route.params.id)
+const studentId = route.params.id as string
 
-const initial = computed(() => {
-  if (!student.value?.name) return ""
-  return student.value.name.charAt(0).toUpperCase()
+const normalizedStudent = computed(() => {
+  if (!student.value) return null
+  return student.value
 })
 
-const allottedLabel = computed(() => student.value?.allotted || "Pending")
+const initial = computed(() => {
+  const name = normalizedStudent.value?.name
+  if (!name) return ""
+  return name.charAt(0).toUpperCase()
+})
+
+const formattedCreatedOn = computed(() => {
+  const value = normalizedStudent.value?.createdOn
+  if (!value) return "-"
+  const millis = value > 1_000_000_000_000 ? value : value * 1000
+  return new Date(millis).toLocaleString()
+})
+
+const formattedModifiedOn = computed(() => {
+  const value = normalizedStudent.value?.modifiedOn
+  if (!value) return "-"
+  const millis = value > 1_000_000_000_000 ? value : value * 1000
+  return new Date(millis).toLocaleString()
+})
 
 const fetchStudent = async () => {
   loading.value = true
   error.value = ""
 
   try {
-    student.value = await getStudentById(studentId)
+    const response = await getStudentById(studentId)
+    student.value = Array.isArray(response) ? response[0] ?? null : response
   } catch (e: any) {
     error.value = e.response?.data?.error || "Failed to load student"
   } finally {
@@ -54,7 +82,7 @@ onMounted(fetchStudent)
       {{ error }}
     </div>
 
-    <div v-else-if="student" class="student-detail-card">
+    <div v-else-if="normalizedStudent" class="student-detail-card">
       <div class="student-detail-hero">
         <div class="student-avatar" aria-hidden="true">
           {{ initial }}
@@ -62,27 +90,43 @@ onMounted(fetchStudent)
 
         <div class="student-identity">
           <p class="section-label">Profile summary</p>
-          <h3>{{ student.name }}</h3>
+          <h3>{{ normalizedStudent.name }}</h3>
           <p class="student-subtitle">
-            Allocation snapshot with percentile, allotted branch, and preferences.
+            Allocation snapshot with percentile, timestamps, and preferences.
           </p>
         </div>
       </div>
 
       <div class="student-metric-grid">
         <div class="student-metric-card">
-          <span class="student-metric-label">Percentile</span>
-          <strong class="student-metric-value">{{ student.percentile }}</strong>
+          <span class="student-metric-label">Student ID</span>
+          <span class="status-pill status-pill--table">
+            {{ normalizedStudent.id || "-" }}
+          </span>
         </div>
-
         <div class="student-metric-card">
-          <span class="student-metric-label">Allotted</span>
-          <span class="status-pill">{{ allottedLabel }}</span>
+          <span class="student-metric-label">Record ID</span>
+          <span class="status-pill status-pill--table">
+            {{ normalizedStudent._id || "-" }}
+          </span>
+        </div>
+        <div class="student-metric-card">
+          <span class="student-metric-label">Percentile</span>
+          <strong class="student-metric-value">{{ normalizedStudent.percentile }}</strong>
         </div>
 
         <div class="student-metric-card">
           <span class="student-metric-label">Preferences</span>
-          <strong class="student-metric-value">{{ student.preferences.length }}</strong>
+          <strong class="student-metric-value">{{ normalizedStudent.preferences.length }}</strong>
+        </div>
+
+        <div class="student-metric-card">
+          <span class="student-metric-label">Created on</span>
+          <strong class="student-metric-value">{{ formattedCreatedOn }}</strong>
+        </div>
+        <div class="student-metric-card">
+          <span class="student-metric-label">Modified on</span>
+          <strong class="student-metric-value">{{ formattedModifiedOn }}</strong>
         </div>
       </div>
 
@@ -92,9 +136,9 @@ onMounted(fetchStudent)
           <p>Selected branches for this student.</p>
         </div>
 
-        <div v-if="student.preferences.length" class="preference-chips">
-          <span v-for="p in student.preferences" :key="p" class="mini-chip">
-            {{ p }}
+        <div v-if="normalizedStudent.preferences.length" class="preference-chips">
+          <span v-for="pref in normalizedStudent.preferences" :key="pref" class="mini-chip">
+            {{ pref }}
           </span>
         </div>
         <p v-else class="student-empty-note">No preferences added yet.</p>

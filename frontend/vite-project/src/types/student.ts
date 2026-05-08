@@ -1,7 +1,10 @@
 export interface Student {
-    id: number
+    _id?: string
+    id: string
     name: string
     percentile: number
     preferences: string[]
-    allotted: string
+    allotted?: string
+    createdOn?: number
+    modifiedOn?: number
 }
