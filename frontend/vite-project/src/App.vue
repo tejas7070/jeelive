@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { useRoute } from "vue-router"
 import { clearToken, hasToken, runCap } from "./services/api"
 
 const route = useRoute()
-const router = useRouter()
 
 const showShell = computed(() => hasToken() && route.name !== "login")
 
@@ -78,7 +77,7 @@ const handleRunCap = async () => {
 
             <p class="jeel-sidebar__section">CAP Management</p>
 
-            <button class="jeel-sidebar__link jeel-sidebar__button" type="button" @click="handleRunCap">
+            <RouterLink to="/students" class="jeel-sidebar__link">
               <span class="jeel-sidebar__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path d="M5 12h14" />
@@ -86,7 +85,7 @@ const handleRunCap = async () => {
                 </svg>
               </span>
               <span>Run CAP</span>
-            </button>
+            </RouterLink>
 
             <RouterLink to="/branches" class="jeel-sidebar__link">
               <span class="jeel-sidebar__icon" aria-hidden="true">

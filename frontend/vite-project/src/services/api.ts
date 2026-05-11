@@ -35,7 +35,7 @@ export const updateStudent = async (id: string, data: any) => {
   return res.data
 }
 export const addStudent = (data: any) => api.post("/r/students", data)
-export const runCap = () => api.post("/r/run-cap")
+export const runCap = () => api.post("/r/runcap")
 export const deleteStudent = (id: string) => api.delete(`/r/students/${id}`)
 export const getStats = () => api.get("/r/stats/seats")
 
