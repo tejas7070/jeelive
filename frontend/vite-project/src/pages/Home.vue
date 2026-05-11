@@ -56,9 +56,7 @@ const actions = [
     label: "Run CAP",
     tone: "green",
     icon: "play",
-    action: async () => {
-      await runCap()
-    }
+    action: () => router.push("/students")
   },
   {
     label: "View All Students",
